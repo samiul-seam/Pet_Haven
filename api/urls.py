@@ -23,6 +23,7 @@ adopt_router = routers.NestedDefaultRouter(
     router, 'adoptions', lookup='adopt')
 adopt_router.register('pets', AdoptPetViewSet, basename='adopt-pet')
 
+
 urlpatterns = [
     path('', include(router.urls)),
     path('', include(pet_router.urls)),

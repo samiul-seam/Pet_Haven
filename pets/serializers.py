@@ -64,8 +64,13 @@ class PetSerializer(serializers.ModelSerializer):
 
     def get_fields(self):
         fields = super().get_fields()
-        user = self.context['request'].user
+        # user = self.context['request'].user
+        request = self.context.get('request')
 
+        if not request:
+            return fields     # Get problem by swagger , so have to change like this.
+        user = request.user
+        
         if not user.is_staff:
             fields['is_adopted'].read_only = True 
             fields.pop('availability', None)

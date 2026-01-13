@@ -13,6 +13,7 @@ class WalletSerializer(serializers.ModelSerializer):
 
 class UserCreateSerializer(BaseUserCreateSerializer):
     class Meta(BaseUserCreateSerializer.Meta):
+        ref_name = 'CustomUser'
         fields = ['id', 'email', 'password', 'first_name', 'last_name', 'phone_number', 'address']
 
 
@@ -39,7 +40,7 @@ class WalletSerializer(serializers.ModelSerializer):
     class Meta:
         model = Wallet
         fields = ['id', 'email', 'balance']
-        read_only_fields = ['email']
+        read_only_fields = ['id', 'email']
 
     def create(self, validated_data):
         user = self.context['user']
@@ -53,26 +54,25 @@ class WalletSerializer(serializers.ModelSerializer):
 
 
 
-
 class WalletAdminSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField()
+    user_id = serializers.IntegerField(write_only=True)
     email = serializers.CharField(source='user.email', read_only=True)
-    balance = serializers.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
         model = Wallet
-        fields = ['id', 'email', 'balance']
+        fields = ['id', 'user_id', 'email', 'balance']
+        read_only_fields = ['id', 'email']
 
     def create(self, validated_data):
-        user_id = validated_data['id']
-        balance = validated_data['balance']
-
+        user_id = validated_data.pop('user_id')
+        amount = validated_data.get('balance')
         try:
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
             raise serializers.ValidationError("User does not exist")
 
-        wallet = Wallet.objects.get_or_create(user=user)
-        wallet.balance = balance
+        wallet, created = Wallet.objects.get_or_create(user=user)
+        wallet.balance += amount
         wallet.save()
         return wallet
+
