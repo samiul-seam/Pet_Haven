@@ -24,22 +24,13 @@ class Pet(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     is_adopted = models.BooleanField(default=False)
 
-    class Availability(models.TextChoices):
-        PUBLIC = 'Public'
-        ANYONE = 'Anyone'
-
-    availability = models.CharField(
-        max_length=20,
-        choices=Availability.choices,
-        default=Availability.PUBLIC
-    )
 
     class Meta:
         ordering = ['id',]
 
     def __str__(self):
         return self.name
-    
+
 class PetImage(models.Model):
     pet = models.ForeignKey(Pet, on_delete=models.CASCADE, related_name='images')
     image = CloudinaryField('image')

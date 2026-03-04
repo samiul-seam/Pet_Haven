@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'drf_yasg',
     'rest_framework',
+    "corsheaders",
     'rest_framework.authtoken',
     'djoser',
     'api',
@@ -43,6 +44,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -84,6 +86,8 @@ WSGI_APPLICATION = 'pet_adopt.wsgi.app'
 #     }
 # }
 
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -94,6 +98,7 @@ DATABASES = {
         'PORT': config('DB_PORT'),
     }
 }
+
 
 cloudinary.config( 
     cloud_name = config('CLOUD_NAME'), 
@@ -110,7 +115,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 # Password validation
@@ -161,6 +166,10 @@ INTERNAL_IPS = [
     "127.0.0.1",
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -172,9 +181,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ],
+    
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
     ),
@@ -184,11 +191,19 @@ REST_FRAMEWORK = {
 DJOSER = {
     'LOGIN_FIELD': 'email',
     'USER_CREATE_PASSWORD_RETYPE': True,
-    'ACTIVATION_URL':'/activate/{uid}/{token}',
+
+    'EMAIL_FRONTEND_PROTOCOL': config('FRONTEND_PROTOCOL'),
+    'EMAIL_FRONTEND_DOMAIN': config('FRONTEND_DOMAIN'),
+
+    'EMAIL_FRONTEND_SITE_NAME': 'Pet-Haven',
+    'ACTIVATION_URL': 'activate/{uid}/{token}',
+
     'SEND_ACTIVATION_EMAIL': True,
     'SEND_CONFIRMATION_EMAIL': True,
+
     'PASSWORD_CHANGED_EMAIL_CONFIRMATION': True,
-    'PASSWORD_RESET_CONFIRM_URL': '/password-reset/{uid}/{token}',
+    'PASSWORD_RESET_CONFIRM_URL': 'password-reset/{uid}/{token}',
+
     'SET_PASSWORD_RETYPE': True,
     'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': True,
     'TOKEN_MODEL':None,
@@ -197,7 +212,6 @@ DJOSER = {
         'user_create': 'users.serializers.UserCreateSerializer',
         'user': 'users.serializers.UserSerializer',
         'current_user': 'users.serializers.UserSerializer',
-        'user_delete': 'djoser.serializers.UserDeleteSerializer',
     },
 }  
 
@@ -221,3 +235,7 @@ SWAGGER_SETTINGS = {
       }
    }
 } 
+
+
+BACKEND_URL = config("BACKEND_URL")
+FRONTEND_URL = config("FRONTEND_URL")

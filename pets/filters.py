@@ -6,5 +6,5 @@ class PetFilter(FilterSet):
         model = Pet
         fields = {
             'category_id': ['exact'],
-            'is_adopted': ['exact'],
+            'price': ['gt', 'lt']
         }

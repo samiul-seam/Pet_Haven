@@ -8,16 +8,16 @@ from rest_framework.response import Response
 from .models import Category, Pet, PetImage, Review
 from .serializers import CategorySerializer, PetSerializer, PetImageSerializer, ReviewSerializer
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import OrderingFilter
+from rest_framework.filters import OrderingFilter, SearchFilter
 from .filters import PetFilter
 from drf_yasg.utils import swagger_auto_schema
+from .paginations import DefaultPagination
 
 
 
 class CategoryViewSet(ModelViewSet):
-    queryset = Category.objects.annotate(pet_count=Count('pets')).all()
+    queryset = Category.objects.annotate(num_pets=Count('pets'))
     serializer_class = CategorySerializer
-    permission_classes = [IsAdminUser]
 
     @swagger_auto_schema(
         operation_summary="Retrieve all categories",
@@ -61,17 +61,17 @@ class CategoryViewSet(ModelViewSet):
 
 class PetViewSet(ModelViewSet):
     serializer_class = PetSerializer
-    filter_backends = [DjangoFilterBackend, OrderingFilter]
-    search_fields = ['name', 'breed']
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    search_fields = ['name', 'breed', 'description']
+    ordering_fields = ['price']
     filterset_class = PetFilter
+    pagination_class = DefaultPagination
     permission_classes = [IsAdminOrReadAndPostOnly]
 
+
     def get_queryset(self):
-        user = self.request.user
-        if user.is_authenticated:
-            return Pet.objects.prefetch_related('images').all()
-        else:
-            return Pet.objects.prefetch_related('images').filter(availability=Pet.Availability.PUBLIC).all()
+        return Pet.objects.prefetch_related('images').all()
+        
         
     @swagger_auto_schema(
         operation_summary="Retrieve all pets",
