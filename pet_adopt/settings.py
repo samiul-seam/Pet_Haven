@@ -168,6 +168,7 @@ INTERNAL_IPS = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "https://pet-haven-portal.vercel.app",
 ]
 
 # Default primary key field type
